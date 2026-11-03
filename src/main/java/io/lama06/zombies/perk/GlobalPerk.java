@@ -11,19 +11,19 @@ public enum GlobalPerk {
     INSTANT_KILL(
             10*20,
             Material.SKELETON_SKULL,
-            Component.text("Insta Kill").color(NamedTextColor.RED),
+            Component.text("Soforttod").color(NamedTextColor.RED),
             BarColor.RED
     ),
     MAX_AMMO(
             0,
             Material.WOODEN_HOE,
-            Component.text("Max Ammo").color(NamedTextColor.BLUE),
+            Component.text("Max Munition").color(NamedTextColor.BLUE),
             BarColor.BLUE
     ),
     DOUBLE_GOLD(
             30*20,
             Material.GOLD_NUGGET,
-            Component.text("Double Gold").color(NamedTextColor.GOLD),
+            Component.text("Doppeltes Gold").color(NamedTextColor.GOLD),
             BarColor.YELLOW
     );
 

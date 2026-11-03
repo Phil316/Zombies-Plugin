@@ -14,9 +14,9 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 public enum PlayerPerk implements MenuDisplayableEnum {
-    FLAME_BULLETS(Material.FIRE_CHARGE, Component.text("Flame Bullets").color(NamedTextColor.YELLOW)),
-    FROZEN_BULLETS(Material.ICE, Component.text("Frozen Bullets").color(NamedTextColor.BLUE)),
-    SPEED(Material.RABBIT_FOOT, Component.text("Speed").color(NamedTextColor.YELLOW)) {
+    FLAME_BULLETS(Material.FIRE_CHARGE, Component.text("Flammenkugeln").color(NamedTextColor.YELLOW)),
+    FROZEN_BULLETS(Material.ICE, Component.text("Eiskugeln").color(NamedTextColor.BLUE)),
+    SPEED(Material.RABBIT_FOOT, Component.text("Tempo").color(NamedTextColor.YELLOW)) {
         @Override
         public void enable(final ZombiesPlayer player) {
             player.getBukkit().addPotionEffect(new PotionEffect(PotionEffectType.SPEED, PotionEffect.INFINITE_DURATION, 1));
@@ -27,8 +27,8 @@ public enum PlayerPerk implements MenuDisplayableEnum {
             player.getBukkit().removePotionEffect(PotionEffectType.SPEED);
         }
     },
-    QUICK_FIRE(Material.WOODEN_HOE, Component.text("Quick Fire").color(NamedTextColor.LIGHT_PURPLE)),
-    EXTRA_HEALTH(Material.GOLDEN_APPLE, Component.text("Extra Health").color(NamedTextColor.RED)) {
+    QUICK_FIRE(Material.WOODEN_HOE, Component.text("Schnellfeuer").color(NamedTextColor.LIGHT_PURPLE)),
+    EXTRA_HEALTH(Material.GOLDEN_APPLE, Component.text("Extra Leben").color(NamedTextColor.RED)) {
         @Override
         public void enable(final ZombiesPlayer player) {
             final AttributeInstance maxHealth = player.getBukkit().getAttribute(Attribute.GENERIC_MAX_HEALTH);
@@ -42,8 +42,8 @@ public enum PlayerPerk implements MenuDisplayableEnum {
             maxHealth.setBaseValue(20);
         }
     },
-    EXTRA_WEAPON(Material.CHEST, Component.text("Extra Weapon").color(NamedTextColor.GREEN)),
-    FAST_REVIVE(Material.COOKIE, Component.text("Fast Revive").color(NamedTextColor.BLUE));
+    EXTRA_WEAPON(Material.CHEST, Component.text("Extra Waffe").color(NamedTextColor.GREEN)),
+    FAST_REVIVE(Material.COOKIE, Component.text("Schnelle Wiederbelebung").color(NamedTextColor.BLUE));
 
     public static final AttributeId<Boolean> IS_PLAYER_PERK = new AttributeId<>("is_player_perk", PersistentDataType.BOOLEAN);
     public static final AttributeId<PlayerPerk> TYPE = new AttributeId<>("type", new EnumPersistentDataType<>(PlayerPerk.class));

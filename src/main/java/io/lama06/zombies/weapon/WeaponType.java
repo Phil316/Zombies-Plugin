@@ -9,7 +9,7 @@ import org.bukkit.Particle;
 public enum WeaponType implements MenuDisplayableEnum {
     KNIFE(
             new WeaponData()
-                    .setDisplayName(Component.text("Knife"))
+                    .setDisplayName(Component.text("Messer"))
                     .setMaterial(Material.IRON_SWORD)
                     .setMelee(new MeleeData(5))
                     .setAttack(new AttackData(5, false, 10))
@@ -17,7 +17,7 @@ public enum WeaponType implements MenuDisplayableEnum {
     ),
     PISTOL(
             new WeaponData()
-                    .setDisplayName(Component.text("Pistol"))
+                    .setDisplayName(Component.text("Pistole"))
                     .setMaterial(Material.WOODEN_HOE)
                     .setShoot(new ShootData(1, 1))
                     .setShootParticle(new ShootParticleData(Particle.FLAME))
@@ -28,7 +28,7 @@ public enum WeaponType implements MenuDisplayableEnum {
     ),
     RIFLE(
             new WeaponData()
-                    .setDisplayName(Component.text("Rifle"))
+                    .setDisplayName(Component.text("Gewehr"))
                     .setMaterial(Material.STONE_HOE)
                     .setShoot(new ShootData(1, 1))
                     .setShootParticle(new ShootParticleData(Particle.SMOKE))
@@ -39,7 +39,7 @@ public enum WeaponType implements MenuDisplayableEnum {
     ),
     SHOTGUN(
             new WeaponData()
-                    .setDisplayName(Component.text("Shotgun"))
+                    .setDisplayName(Component.text("Schrotflinte"))
                     .setMaterial(Material.IRON_HOE)
                     .setShoot(new ShootData(10, 0.85))
                     .setShootParticle(new ShootParticleData(Particle.FLAME))
@@ -50,7 +50,7 @@ public enum WeaponType implements MenuDisplayableEnum {
     ),
     SNIPER(
             new WeaponData()
-                    .setDisplayName(Component.text("Sniper"))
+                    .setDisplayName(Component.text("Scharfschützengewehr"))
                     .setMaterial(Material.WOODEN_SHOVEL)
                     .setShoot(new ShootData(2, 1))
                     .setShootParticle(new ShootParticleData(Particle.FLAME))
@@ -62,7 +62,7 @@ public enum WeaponType implements MenuDisplayableEnum {
     ),
     FLAME_THROWER(
             new WeaponData()
-                    .setDisplayName(Component.text("Flame Thrower"))
+                    .setDisplayName(Component.text("Flammenwerfer"))
                     .setMaterial(Material.GOLDEN_HOE)
                     .setShoot(new ShootData(1, 0.95))
                     .setShootParticle(new ShootParticleData(Particle.FLAME))
@@ -74,7 +74,7 @@ public enum WeaponType implements MenuDisplayableEnum {
     ),
     GOLD_DIGGER(
             new WeaponData()
-                    .setDisplayName(Component.text("Gold Digger").color(NamedTextColor.GOLD))
+                    .setDisplayName(Component.text("Goldgräber").color(NamedTextColor.GOLD))
                     .setMaterial(Material.GOLDEN_PICKAXE)
                     .setAttack(new AttackData(6, false, 13))
                     .setShoot(new ShootData(1, 1))
