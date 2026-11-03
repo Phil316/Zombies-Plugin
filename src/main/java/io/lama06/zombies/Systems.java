@@ -75,6 +75,7 @@ public final class Systems {
             new RunFrozenBulletsPerkSystem(),
 
             // Player
+            new AutoStartGameSystem(),
             new DetectPlayerKillsZombieSystem(),
             new IncrementPlayerKillsSystem(),
             new MakeDeadPlayersSpectatorsSystem(),
