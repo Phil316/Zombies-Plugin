@@ -1,5 +1,6 @@
 package io.lama06.zombies.system.player;
 
+import io.lama06.zombies.ZombiesPlugin;
 import io.lama06.zombies.ZombiesWorld;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -24,26 +25,33 @@ public final class MakeDeadPlayersSpectatorsSystem implements Listener {
 
         event.setKeepInventory(true);
         event.setShouldDropExperience(false);
-        event.setShowDeathScreen(false);
         event.deathMessage(
                 bukkitPlayer.displayName()
                         .append(Component.text(" ist gestorben").color(NamedTextColor.RED))
         );
 
-        bukkitPlayer.setGameMode(GameMode.SPECTATOR);
-
-        // Hypixel-Style großer Text in der Mitte
-        bukkitPlayer.showTitle(Title.title(
-                Component.text("DU BIST GESTORBEN")
-                        .color(NamedTextColor.RED)
-                        .decorate(TextDecoration.BOLD),
-                Component.text("Warte auf Wiederbelebung...")
-                        .color(NamedTextColor.GRAY),
-                Title.Times.times(
-                        Duration.ofMillis(250),
-                        Duration.ofSeconds(4),
-                        Duration.ofMillis(500)
-                )
-        ));
+        // Sofort als Spectator respawnen -> kein Death-Menü (Paper 1.20.x)
+        ZombiesPlugin.INSTANCE.getServer().getScheduler().runTask(
+                ZombiesPlugin.INSTANCE,
+                () -> {
+                    if (!bukkitPlayer.isOnline()) {
+                        return;
+                    }
+                    bukkitPlayer.spigot().respawn();
+                    bukkitPlayer.setGameMode(GameMode.SPECTATOR);
+                    bukkitPlayer.showTitle(Title.title(
+                            Component.text("DU BIST GESTORBEN")
+                                    .color(NamedTextColor.RED)
+                                    .decorate(TextDecoration.BOLD),
+                            Component.text("Warte auf Wiederbelebung...")
+                                    .color(NamedTextColor.GRAY),
+                            Title.Times.times(
+                                    Duration.ofMillis(250),
+                                    Duration.ofSeconds(4),
+                                    Duration.ofMillis(500)
+                            )
+                    ));
+                }
+        );
     }
 }
