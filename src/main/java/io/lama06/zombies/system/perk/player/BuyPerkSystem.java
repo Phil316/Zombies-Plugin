@@ -32,11 +32,11 @@ public final class BuyPerkSystem implements Listener {
             return;
         }
         if (!world.get(ZombiesWorld.POWER_SWITCH)) {
-            player.sendMessage(Component.text("The power switch isn't enabled"));
+            player.sendMessage(Component.text("Strom ist noch nicht an! Aktiviere zuerst den Power Switch.").color(NamedTextColor.RED));
             return;
         }
         if (player.hasPerk(perkMachine.perk)) {
-            player.sendMessage(Component.text("You already own this perk").color(NamedTextColor.RED));
+            player.sendMessage(Component.text("Du hast diesen Perk bereits.").color(NamedTextColor.RED));
             return;
         }
         if (!player.requireGold(perkMachine.gold)) {
@@ -44,11 +44,11 @@ public final class BuyPerkSystem implements Listener {
         }
         final int slot = player.getBukkit().getInventory().getHeldItemSlot();
         if (slot < 6 || slot >= 9) {
-            player.sendMessage(Component.text("Select a valid perk slot").color(NamedTextColor.RED));
+            player.sendMessage(Component.text("Waehle einen Perk-Slot (7-9).").color(NamedTextColor.RED));
             return;
         }
         player.givePerk(slot, perkMachine.perk);
         player.pay(perkMachine.gold);
-        player.sendMessage(Component.text("Successfully bought ").color(NamedTextColor.GREEN).append(perkMachine.perk.getDisplayName()));
+        player.sendMessage(Component.text("Gekauft: ").color(NamedTextColor.GREEN).append(perkMachine.perk.getDisplayName()));
     }
 }

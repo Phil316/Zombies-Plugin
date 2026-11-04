@@ -5,11 +5,14 @@ import io.lama06.zombies.ZombiesPlayer;
 import io.lama06.zombies.ZombiesWorld;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
+
+import java.time.Duration;
 
 public final class EnablePowerSwitchSystem implements Listener {
     @EventHandler
@@ -35,14 +38,18 @@ public final class EnablePowerSwitchSystem implements Listener {
         }
         final boolean powerSwitchOn = world.get(ZombiesWorld.POWER_SWITCH);
         if (powerSwitchOn) {
-            player.sendMessage(Component.text("The power switch is already activated").color(NamedTextColor.RED));
+            player.sendMessage(Component.text("Strom ist bereits an.").color(NamedTextColor.RED));
             return;
         }
         if (!player.requireGold(config.powerSwitch.gold)) {
             return;
         }
         player.pay(config.powerSwitch.gold);
-        world.showTitle(Title.title(Component.text(player.getBukkit().getName() + " activated the power switch"), Component.empty()));
+        world.showTitle(Title.title(
+                Component.text("STROM AN").color(NamedTextColor.YELLOW).decorate(TextDecoration.BOLD),
+                Component.text(player.getBukkit().getName() + " hat den Power Switch aktiviert").color(NamedTextColor.GRAY),
+                Title.Times.times(Duration.ofMillis(200), Duration.ofSeconds(3), Duration.ofMillis(400))
+        ));
         world.set(ZombiesWorld.POWER_SWITCH, true);
     }
 }

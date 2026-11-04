@@ -47,29 +47,29 @@ public final class InteractWithWeaponShopSystem implements Listener {
     private void buyWeapon(final ZombiesPlayer player, final WeaponShop shop) {
         final int gold = player.get(ZombiesPlayer.GOLD);
         if (gold < shop.purchasePrice) {
-            player.sendMessage(Component.text("You cannot afford this weapon").color(NamedTextColor.RED));
+            player.sendMessage(Component.text("Nicht genug Gold.").color(NamedTextColor.RED));
             return;
         }
         final int slot = player.getBukkit().getInventory().getHeldItemSlot();
         if (slot == 0 || slot > player.getLastWeaponSlot()) {
-            player.sendMessage(Component.text("Switch to a weapon slot").color(NamedTextColor.RED));
+            player.sendMessage(Component.text("Wechsle auf einen Waffen-Slot.").color(NamedTextColor.RED));
             return;
         }
         player.giveWeapon(slot, shop.weaponType);
         player.set(ZombiesPlayer.GOLD, gold - shop.purchasePrice);
         Bukkit.getPluginManager().callEvent(new PlayerGoldChangeEvent(player, gold, gold - shop.purchasePrice));
-        player.sendMessage(Component.text("Successfully bought the weapon").color(NamedTextColor.GREEN));
+        player.sendMessage(Component.text("Waffe gekauft.").color(NamedTextColor.GREEN));
     }
 
     private void refillWeapon(final ZombiesPlayer player, final WeaponShop shop, final Weapon weapon) {
         final int gold = player.get(ZombiesPlayer.GOLD);
         if (gold < shop.refillPrice) {
-            player.sendMessage(Component.text("You cannot afford refilling this weapon").color(NamedTextColor.RED));
+            player.sendMessage(Component.text("Nicht genug Gold zum Nachfullen.").color(NamedTextColor.RED));
             return;
         }
         final io.lama06.zombies.data.Component ammComponent = weapon.getComponent(Weapon.AMMO);
         if (ammComponent == null) {
-            player.sendMessage(Component.text("This weapon cannot be refilled").color(NamedTextColor.RED));
+            player.sendMessage(Component.text("Diese Waffe kann nicht nachgefullt werden.").color(NamedTextColor.RED));
             return;
         }
         final AmmoData ammoData = weapon.getData().ammo;
@@ -78,7 +78,7 @@ public final class InteractWithWeaponShopSystem implements Listener {
         final int maxAmmo = ammoData.ammo();
         final int maxClip = ammoData.clip();
         if (ammo == maxAmmo) {
-            player.sendMessage(Component.text("This weapon is already refilled").color(NamedTextColor.RED));
+            player.sendMessage(Component.text("Waffe ist bereits voll.").color(NamedTextColor.RED));
             return;
         }
         ammComponent.set(AmmoData.CLIP, maxClip);
@@ -89,6 +89,6 @@ public final class InteractWithWeaponShopSystem implements Listener {
         player.set(ZombiesPlayer.GOLD, gold - shop.refillPrice);
         Bukkit.getPluginManager().callEvent(new PlayerGoldChangeEvent(player, gold, gold - shop.refillPrice));
 
-        player.sendMessage(Component.text("Successfully refilled the weapon").color(NamedTextColor.GREEN));
+        player.sendMessage(Component.text("Waffe nachgefullt.").color(NamedTextColor.GREEN));
     }
 }
