@@ -32,6 +32,7 @@ import org.bukkit.entity.Player;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -66,7 +67,7 @@ public final class ZombiesCommandExecutor implements TabExecutor {
             case "cancel" -> cancel(sender);
             case "placeSigns" -> placeSigns(sender, remainingArgs);
             case "dumpWorldConfig" -> dumpWorldConfig(sender);
-            default -> sender.sendMessage(Component.text("unknown command").color(NamedTextColor.RED));
+            default -> sender.sendMessage(Component.text("Unbekannter Befehl").color(NamedTextColor.RED));
         }
 
         return true;
@@ -91,7 +92,8 @@ public final class ZombiesCommandExecutor implements TabExecutor {
                 "stop",
                 "giveGold",
                 "giveWeapon",
-                "spawnZombie"
+                "spawnZombie",
+                "placeSigns"
         );
     }
 
@@ -111,9 +113,7 @@ public final class ZombiesCommandExecutor implements TabExecutor {
         builder.append(Component.text("Lama06").color(NamedTextColor.GOLD));
 
         builder.appendNewline();
-        builder.append(Component.text("Website: "));
-        builder.append(Component.text("github.com/Lama06/Zombies-Plugin")
-                               .clickEvent(ClickEvent.openUrl("https://github.com/Lama06/Zombies-Plugin/")));
+        builder.append(Component.text("Befehle: /zombies loadTemplate  |  /zombies start  |  /zombies placeSigns"));
 
         sender.sendMessage(builder);
     }
@@ -124,9 +124,7 @@ public final class ZombiesCommandExecutor implements TabExecutor {
         }
         final ZombiesWorld world = new ZombiesWorld(player.getWorld());
         if (world.isGameRunning()) {
-            final String warning = "It isn't supported to edit a running game's config. " +
-                    "Only continue if you know what you're doing.";
-            sender.sendMessage(Component.text(warning).color(NamedTextColor.RED));
+            sender.sendMessage(Component.text("Config wahrend eines laufenden Spiels andern ist riskant.").color(NamedTextColor.RED));
         }
         WorldConfig config = world.getConfig();
         if (config == null) {
@@ -141,10 +139,11 @@ public final class ZombiesCommandExecutor implements TabExecutor {
         try {
             ZombiesPlugin.INSTANCE.getConfigManager().saveConfig();
         } catch (final IOException e) {
-            sender.sendMessage(Component.text("error: " + e.getMessage()));
+            sender.sendMessage(Component.text("Fehler beim Speichern: " + e.getMessage()).color(NamedTextColor.RED));
             ZombiesPlugin.INSTANCE.getSLF4JLogger().error("failed to save config", e);
+            return;
         }
-        sender.sendMessage(Component.text("Saved").color(NamedTextColor.GREEN));
+        sender.sendMessage(Component.text("Config gespeichert.").color(NamedTextColor.GREEN));
     }
 
     private void checkConfig(final CommandSender sender) {
@@ -153,70 +152,91 @@ public final class ZombiesCommandExecutor implements TabExecutor {
         }
         final WorldConfig config = ZombiesPlugin.INSTANCE.getWorldConfig(new ZombiesWorld(player.getWorld()));
         if (config == null) {
-            sender.sendMessage(Component.text("This world isn't configured"));
+            sender.sendMessage(Component.text("Diese Welt ist nicht konfiguriert. Nutze /zombies loadTemplate").color(NamedTextColor.RED));
             return;
         }
         try {
             config.check();
         } catch (final InvalidConfigException e) {
-            sender.sendMessage(Component.text(e.getMessage()).color(NamedTextColor.RED));
+            sender.sendMessage(Component.text("Config-Fehler: " + e.getMessage()).color(NamedTextColor.RED));
             return;
         }
-        sender.sendMessage(Component.text("No issues found").color(NamedTextColor.GREEN));
+        sender.sendMessage(Component.text("Keine Probleme gefunden.").color(NamedTextColor.GREEN));
     }
 
     private void loadTemplate(final CommandSender sender) {
         if (!(sender instanceof final Player player)) {
+            sender.sendMessage(Component.text("Nur als Spieler nutzbar.").color(NamedTextColor.RED));
             return;
         }
         final ZombiesWorld world = new ZombiesWorld(player.getWorld());
         final ZombiesConfig globalConfig = ZombiesPlugin.INSTANCE.getGlobalConfig();
         final InputStream resource = ZombiesPlugin.INSTANCE.getResource(DEAD_END_TEMPLATE);
         if (resource == null) {
-            sender.sendMessage(Component.text("Template unavailable. Please contact the plugins's author.").color(NamedTextColor.RED));
+            sender.sendMessage(Component.text("Dead-End-Template fehlt in der Plugin-JAR.").color(NamedTextColor.RED));
             return;
         }
         final WorldConfig config;
-        try {
-            config = ConfigManager.createGson().fromJson(new InputStreamReader(resource), WorldConfig.class);
+        try (resource) {
+            config = ConfigManager.createGson().fromJson(new InputStreamReader(resource, StandardCharsets.UTF_8), WorldConfig.class);
         } catch (final JsonParseException e) {
-            sender.sendMessage(Component.text("Template malformed. Please contact the plugins's author."));
+            sender.sendMessage(Component.text("Template kaputt (JSON): " + e.getMessage()).color(NamedTextColor.RED));
+            ZombiesPlugin.INSTANCE.getSLF4JLogger().error("dead_end template parse failed", e);
+            return;
+        } catch (final IOException e) {
+            sender.sendMessage(Component.text("Template konnte nicht gelesen werden.").color(NamedTextColor.RED));
+            return;
+        }
+        if (config == null) {
+            sender.sendMessage(Component.text("Template ist leer / konnte nicht geladen werden.").color(NamedTextColor.RED));
             return;
         }
         globalConfig.worlds.put(world.getBukkit().getName(), config);
-        sender.sendMessage(Component.text("Template loaded. Start the game: Click me!").color(NamedTextColor.GREEN)
-                                   .clickEvent(ClickEvent.suggestCommand("/zombies start")));
+
+        try {
+            ZombiesPlugin.INSTANCE.getConfigManager().saveConfig();
+        } catch (final IOException e) {
+            sender.sendMessage(Component.text("Geladen, aber Speichern fehlgeschlagen: " + e.getMessage()).color(NamedTextColor.YELLOW));
+        }
+
+        // Schilder mit Preisen setzen (Name-Tags an Shops/Maschinen)
+        placeSigns(player, new String[]{"ok"});
+
+        sender.sendMessage(Component.text("Dead-End-Config geladen und gespeichert.").color(NamedTextColor.GREEN));
+        sender.sendMessage(Component.text("> Klicke hier zum Starten <")
+                                   .color(NamedTextColor.GOLD)
+                                   .decorate(TextDecoration.BOLD)
+                                   .clickEvent(ClickEvent.runCommand("/zombies start")));
     }
 
     private void start(final CommandSender sender) {
         if (!(sender instanceof final Player player)) {
+            sender.sendMessage(Component.text("Nur als Spieler nutzbar.").color(NamedTextColor.RED));
             return;
         }
         final ZombiesWorld world = new ZombiesWorld(player.getWorld());
         if (!world.isZombiesWorld()) {
-            final Component msg = Component.text("You muse first configure this world.").color(NamedTextColor.RED)
+            final Component msg = Component.text("Welt ist nicht konfiguriert.").color(NamedTextColor.RED)
                     .appendNewline()
-                    .append(Component.text("> Configure manually <")
-                                    .clickEvent(ClickEvent.runCommand("/zombies config"))
-                                    .color(NamedTextColor.BLUE))
-                    .appendNewline()
-                    .append(Component.text("> Load Dead End config (recommended) <")
+                    .append(Component.text("> Dead-End-Config laden (empfohlen) <")
                                     .clickEvent(ClickEvent.runCommand("/zombies loadTemplate"))
                                     .color(NamedTextColor.GREEN));
             sender.sendMessage(msg);
             return;
         }
         if (world.isGameRunning()) {
-            sender.sendMessage(Component.text("The game is already running").color(NamedTextColor.RED));
+            sender.sendMessage(Component.text("Das Spiel lauft bereits.").color(NamedTextColor.RED));
             return;
         }
         try {
             world.getConfig().check();
         } catch (final InvalidConfigException e) {
-            player.sendMessage(Component.text("The config is invalid: " + e.getMessage()).color(NamedTextColor.RED));
+            player.sendMessage(Component.text("Config ungueltig: " + e.getMessage()).color(NamedTextColor.RED));
+            player.sendMessage(Component.text("Tipp: /zombies loadTemplate erneut ausfuhren.").color(NamedTextColor.YELLOW));
             return;
         }
         world.startGame();
+        player.sendMessage(Component.text("Spiel gestartet!").color(NamedTextColor.GREEN));
     }
 
     private void stop(final CommandSender sender) {
@@ -225,10 +245,11 @@ public final class ZombiesCommandExecutor implements TabExecutor {
         }
         final ZombiesWorld world = new ZombiesWorld(player.getWorld());
         if (!world.isZombiesWorld() || !world.isGameRunning()) {
-            sender.sendMessage(Component.text("The game isn't running").color(NamedTextColor.RED));
+            sender.sendMessage(Component.text("Es lauft kein Spiel.").color(NamedTextColor.RED));
             return;
         }
         world.endGame();
+        sender.sendMessage(Component.text("Spiel gestoppt.").color(NamedTextColor.YELLOW));
     }
 
     private void giveWeapon(final CommandSender sender, final String[] args) {
@@ -375,11 +396,11 @@ public final class ZombiesCommandExecutor implements TabExecutor {
 
         if (args.length == 0 || !args[0].equalsIgnoreCase("ok")) {
             final TextComponent.Builder builder = Component.text();
-            builder.append(Component.text("Executing this command will place signs at every armor and weapon shop."));
+            builder.append(Component.text("Schilder an allen Waffen-/Ruestungs-Shops und Perk-Maschinen setzen."));
             builder.appendNewline();
-            builder.append(Component.text("Existing blocks will be removed. This cannot be reverted").color(NamedTextColor.RED));
+            builder.append(Component.text("Vorhandene Bloecke werden ersetzt.").color(NamedTextColor.RED));
             builder.appendNewline();
-            builder.append(Component.text("> Click here to confirm <")
+            builder.append(Component.text("> Hier klicken zum Bestaetigen <")
                                    .clickEvent(ClickEvent.runCommand("/zombies placeSigns ok"))
                                    .color(NamedTextColor.BLUE));
             sender.sendMessage(builder);
@@ -388,6 +409,7 @@ public final class ZombiesCommandExecutor implements TabExecutor {
 
         final ZombiesWorld world = new ZombiesWorld(player.getWorld());
         if (!world.isZombiesWorld()) {
+            sender.sendMessage(Component.text("Zuerst /zombies loadTemplate ausfuhren.").color(NamedTextColor.RED));
             return;
         }
         final WorldConfig config = world.getConfig();
@@ -397,7 +419,7 @@ public final class ZombiesCommandExecutor implements TabExecutor {
                 continue;
             }
             final boolean ok = placeSign(this::getShopSignPosition, world.getBukkit(), armorShop.position, List.of(
-                    armorShop.quality.getDisplayName().append(Component.text(" Armor")),
+                    armorShop.quality.getDisplayName().append(Component.text(" Ruestung")),
                     armorShop.part.getDisplayName(),
                     Component.text(armorShop.price + " Gold").color(NamedTextColor.GOLD)
             ));
@@ -412,7 +434,7 @@ public final class ZombiesCommandExecutor implements TabExecutor {
             final boolean ok = placeSign(this::getShopSignPosition, world.getBukkit(), weaponShop.position, List.of(
                     weaponShop.weaponType.getDisplayName(),
                     Component.text(weaponShop.purchasePrice + " Gold").color(NamedTextColor.GOLD),
-                    Component.text("Refill: ").append(Component.text(weaponShop.refillPrice + " Gold").color(NamedTextColor.GOLD))
+                    Component.text("Nachfullen: ").append(Component.text(weaponShop.refillPrice + " Gold").color(NamedTextColor.GOLD))
             ));
             if (!ok) {
                 errors.add(weaponShop.position);
@@ -424,16 +446,28 @@ public final class ZombiesCommandExecutor implements TabExecutor {
             }
             final boolean ok = placeSign(this::getPerkSignPosition, world.getBukkit(), perkMachine.position, List.of(
                     perkMachine.perk.getDisplayName(),
-                    Component.text(perkMachine.gold + " Gold").color(NamedTextColor.GOLD)
+                    Component.text(perkMachine.gold + " Gold").color(NamedTextColor.GOLD),
+                    Component.text("Braucht Strom").color(NamedTextColor.RED)
             ));
             if (!ok) {
                 errors.add(perkMachine.position);
             }
         }
-        for (final BlockPosition error : errors) {
-            sender.sendMessage(Component.text("Failed to place sign at " + PositionUtil.format(error)).color(NamedTextColor.RED));
+        // Power-Switch Hinweis-Schild falls Position gesetzt
+        if (config.powerSwitch != null && config.powerSwitch.position != null) {
+            final boolean ok = placeSign(this::getShopSignPosition, world.getBukkit(), config.powerSwitch.position, List.of(
+                    Component.text("STROM").color(NamedTextColor.YELLOW).decorate(TextDecoration.BOLD),
+                    Component.text(config.powerSwitch.gold + " Gold").color(NamedTextColor.GOLD),
+                    Component.text("Rechtsklick")
+            ));
+            if (!ok) {
+                errors.add(config.powerSwitch.position);
+            }
         }
-        sender.sendMessage(Component.text("Done").color(NamedTextColor.GREEN));
+        for (final BlockPosition error : errors) {
+            sender.sendMessage(Component.text("Schild fehlgeschlagen bei " + PositionUtil.format(error)).color(NamedTextColor.RED));
+        }
+        sender.sendMessage(Component.text("Schilder gesetzt (Preise / Braucht Strom).").color(NamedTextColor.GREEN));
     }
 
     private void dumpWorldConfig(final CommandSender sender) {
@@ -447,6 +481,6 @@ public final class ZombiesCommandExecutor implements TabExecutor {
         final WorldConfig config = world.getConfig();
         final Gson gson = ConfigManager.createGson();
         final String json = gson.toJson(config);
-        sender.sendMessage(Component.text("> Copy <").clickEvent(ClickEvent.copyToClipboard(json)).color(NamedTextColor.GREEN));
+        sender.sendMessage(Component.text("> Kopieren <").clickEvent(ClickEvent.copyToClipboard(json)).color(NamedTextColor.GREEN));
     }
 }
