@@ -10,5 +10,5 @@ commands:
     permission: zombies
 permissions:
   zombies:
-    default: op
+    default: true
     description: Gives access to the Zombies Plugin's command

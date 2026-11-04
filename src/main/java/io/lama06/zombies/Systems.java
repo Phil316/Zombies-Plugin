@@ -51,14 +51,10 @@ public final class Systems {
             new StartNextRoundSystem(),
             new TeamMachineSystem(),
 
-            // Lucky Chest
             new InteractWithLuckyChestSystem(),
             new RemoveLuckyChestItemsSystem(),
             new ShuffleLuckyChestItemSystem(),
 
-            // Perk
-
-            // Global
             new EnableTemporaryPerksSystem(),
             new PerformInstantKillPerkSystem(),
             new PerformMaxAmmoPerkSystem(),
@@ -68,28 +64,22 @@ public final class Systems {
             new RemovePerkItemsSystem(),
             new TickTemporaryPerksSystem(),
 
-            // Player Perks
             new BuyPerkSystem(),
             new RemovePerksOnDeathSystem(),
             new RunFlameBulletsPerkSystem(),
             new RunFrozenBulletsPerkSystem(),
 
-            // Player
-            new AutoStartGameSystem(),
             new DetectPlayerKillsZombieSystem(),
             new IncrementPlayerKillsSystem(),
             new MakeDeadPlayersSpectatorsSystem(),
             new RenderScoreboardSystem(),
             new RespawnDeadPlayersAfterRoundSystem(),
 
-            // Revive
             new SpawnPlayerCorpseSystem(),
             new TickPlayerCorpseSystem(),
 
-            // Weapon
             new RenderWeaponLoreSystem(),
 
-            // Ammo
             new DecrementAmmoAfterWeaponUseSystem(),
             new InitAmmoSystem(),
             new PreventWeaponUseWithEmptyClipSystem(),
@@ -98,12 +88,10 @@ public final class Systems {
             new RenderAmmoLoreSystem(),
             new RenderTotalAmmoSystem(),
 
-            // Attack
             new ApplyAttackDamageSystem(),
             new GiveGoldAfterAttackSystem(),
             new RenderAmmoLoreSystem(),
 
-            // Delay
             new InitDelaySystem(),
             new PreventWeaponUseDuringDelaySystem(),
             new RenderDelayLoreSystem(),
@@ -111,11 +99,9 @@ public final class Systems {
             new StartDelayAfterWeaponUseSystem(),
             new TickDelaySystem(),
 
-            // Melee
             new AttackMeleeSystem(),
             new RenderMeleeLoreSystem(),
 
-            // Reload
             new InitReloadSystem(),
             new PreventWeaponUseDuringReloadSystem(),
             new RenderReloadLoreSystem(),
@@ -124,12 +110,10 @@ public final class Systems {
             new StartReloadManualSystem(),
             new TickReloadSystem(),
 
-            // Shoot
             new FireBulletsSystem(),
             new RenderShootLoreSystem(),
             new SpawnParticlesAfterShotSystem(),
 
-            // Zombie
             new AngerZombiesSystem(),
             new DamageZombieAfterAttackSystem(),
             new InitZombieEquipmentSystem(),
@@ -142,7 +126,6 @@ public final class Systems {
             new SpawnFireTrailSystem(),
             new SpawnZombiesSystem(),
 
-            // Break Window
             new CancelMovementDuringWindowBreakingSystem(),
             new CancelWindowBreakingOnBlockDisappearanceSystem(),
             new InitWindowBreakingSystem(),
@@ -150,15 +133,12 @@ public final class Systems {
             new StartWindowBreakingSystem(),
             new TickWindowBreakingSystem(),
 
-            // Explosion Attack
             new ExplodeOnDeathSystem(),
             new ExplodePeriodicallySystem(),
 
-            // Fireball Attack
             new DamagePlayerWhenFireballExplodesSystem(),
             new SpawnFireballsSystem(),
 
-            // Laser Attack
             new InitLaserAttackSystem(),
             new LaserAttackDamageSystem(),
             new MoveLaserAttackGuardianSystem(),
