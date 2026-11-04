@@ -31,7 +31,7 @@ public enum WeaponType implements MenuDisplayableEnum {
                     .setDisplayName(Component.text("Gewehr"))
                     .setMaterial(Material.STONE_HOE)
                     .setShoot(new ShootData(1, 1))
-                    .setShootParticle(new ShootParticleData(Particle.SMOKE))
+                    .setShootParticle(new ShootParticleData(Particle.SMOKE_NORMAL))
                     .setAttack(new AttackData(5, false, 7))
                     .setAmmo(new AmmoData(288, 32))
                     .setDelay(new DelayData(4))
@@ -50,7 +50,7 @@ public enum WeaponType implements MenuDisplayableEnum {
     ),
     SNIPER(
             new WeaponData()
-                    .setDisplayName(Component.text("Scharfschützengewehr"))
+                    .setDisplayName(Component.text("Scharfschuetzengewehr"))
                     .setMaterial(Material.WOODEN_SHOVEL)
                     .setShoot(new ShootData(2, 1))
                     .setShootParticle(new ShootParticleData(Particle.FLAME))
@@ -74,7 +74,7 @@ public enum WeaponType implements MenuDisplayableEnum {
     ),
     GOLD_DIGGER(
             new WeaponData()
-                    .setDisplayName(Component.text("Goldgräber").color(NamedTextColor.GOLD))
+                    .setDisplayName(Component.text("Goldgraeber").color(NamedTextColor.GOLD))
                     .setMaterial(Material.GOLDEN_PICKAXE)
                     .setAttack(new AttackData(6, false, 13))
                     .setShoot(new ShootData(1, 1))
