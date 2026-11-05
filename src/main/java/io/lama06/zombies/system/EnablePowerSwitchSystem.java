@@ -45,11 +45,13 @@ public final class EnablePowerSwitchSystem implements Listener {
             return;
         }
         player.pay(config.powerSwitch.gold);
+        world.set(ZombiesWorld.POWER_SWITCH, true);
         world.showTitle(Title.title(
                 Component.text("STROM AN").color(NamedTextColor.YELLOW).decorate(TextDecoration.BOLD),
                 Component.text(player.getBukkit().getName() + " hat den Power Switch aktiviert").color(NamedTextColor.GRAY),
                 Title.Times.times(Duration.ofMillis(200), Duration.ofSeconds(3), Duration.ofMillis(400))
         ));
-        world.set(ZombiesWorld.POWER_SWITCH, true);
+        // Perk-Schilder auf Preise umstellen
+        ShopDisplaySystem.refreshAll(world);
     }
 }
