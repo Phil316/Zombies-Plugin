@@ -70,6 +70,8 @@ public final class ZombiesPlayer extends Storage implements ForwardingAudience {
         final ItemStack item = new ItemStack(type.data.material);
         final ItemMeta meta = item.getItemMeta();
         meta.displayName(type.data.displayName);
+        // Resource-Pack erkennt Waffen ueber CustomModelData (nicht ueber Namen)
+        meta.setCustomModelData(type.customModelData);
         item.setItemMeta(meta);
         final PlayerInventory inventory = player.getInventory();
         inventory.setItem(slot, item);
@@ -139,7 +141,7 @@ public final class ZombiesPlayer extends Storage implements ForwardingAudience {
     public boolean requireGold(final int gold) {
         final int currentGold = get(GOLD);
         if (currentGold < gold) {
-            sendMessage(Component.text("You cannot afford this").color(NamedTextColor.RED));
+            sendMessage(Component.text("Nicht genug Gold.").color(NamedTextColor.RED));
             return false;
         }
         return true;
