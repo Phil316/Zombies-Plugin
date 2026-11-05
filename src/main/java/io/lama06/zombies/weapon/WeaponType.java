@@ -13,7 +13,8 @@ public enum WeaponType implements MenuDisplayableEnum {
                     .setMaterial(Material.IRON_SWORD)
                     .setMelee(new MeleeData(5))
                     .setAttack(new AttackData(5, false, 10))
-                    .setDelay(new DelayData(10))
+                    .setDelay(new DelayData(10)),
+            1001
     ),
     PISTOL(
             new WeaponData()
@@ -24,7 +25,8 @@ public enum WeaponType implements MenuDisplayableEnum {
                     .setAttack(new AttackData(5, false, 10))
                     .setAmmo(new AmmoData(300, 10))
                     .setDelay(new DelayData(10))
-                    .setReload(new ReloadData(30))
+                    .setReload(new ReloadData(30)),
+            1002
     ),
     RIFLE(
             new WeaponData()
@@ -35,7 +37,8 @@ public enum WeaponType implements MenuDisplayableEnum {
                     .setAttack(new AttackData(5, false, 7))
                     .setAmmo(new AmmoData(288, 32))
                     .setDelay(new DelayData(4))
-                    .setReload(new ReloadData(30))
+                    .setReload(new ReloadData(30)),
+            1003
     ),
     SHOTGUN(
             new WeaponData()
@@ -46,7 +49,8 @@ public enum WeaponType implements MenuDisplayableEnum {
                     .setAttack(new AttackData(1.5, false, 8))
                     .setAmmo(new AmmoData(65, 5))
                     .setDelay(new DelayData((int) (1.4 * 20)))
-                    .setReload(new ReloadData((int) (1.5 * 20)))
+                    .setReload(new ReloadData((int) (1.5 * 20))),
+            1004
     ),
     SNIPER(
             new WeaponData()
@@ -58,7 +62,8 @@ public enum WeaponType implements MenuDisplayableEnum {
                     .setAmmo(new AmmoData(40, 4))
                     .setDelay(new DelayData(30))
                     .setReload(new ReloadData(40))
-                    .includeInLuckyChest()
+                    .includeInLuckyChest(),
+            1005
     ),
     FLAME_THROWER(
             new WeaponData()
@@ -70,7 +75,8 @@ public enum WeaponType implements MenuDisplayableEnum {
                     .setAmmo(new AmmoData(350, 50))
                     .setDelay(new DelayData(2))
                     .setReload(new ReloadData(30))
-                    .includeInLuckyChest()
+                    .includeInLuckyChest(),
+            1006
     ),
     GOLD_DIGGER(
             new WeaponData()
@@ -82,13 +88,17 @@ public enum WeaponType implements MenuDisplayableEnum {
                     .setDelay(new DelayData(10))
                     .setReload(new ReloadData(30))
                     .setAmmo(new AmmoData(70, 7))
-                    .includeInLuckyChest()
+                    .includeInLuckyChest(),
+            1007
     );
 
     public final WeaponData data;
+    /** CustomModelData fuer Resource-Pack (1.20). */
+    public final int customModelData;
 
-    WeaponType(final WeaponData data) {
+    WeaponType(final WeaponData data, final int customModelData) {
         this.data = data;
+        this.customModelData = customModelData;
     }
 
     @Override
