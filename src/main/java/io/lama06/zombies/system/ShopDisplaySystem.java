@@ -7,7 +7,6 @@ import io.lama06.zombies.WorldConfig;
 import io.lama06.zombies.ZombiesWorld;
 import io.lama06.zombies.perk.PerkMachine;
 import io.lama06.zombies.util.HologramUtil;
-import io.lama06.zombies.util.PositionUtil;
 import io.papermc.paper.math.BlockPosition;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -27,10 +26,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Setzt Schilder + schwebende Tuer-Hologramme (wie Hypixel-Nametags).
- * Perk-Maschinen: ohne Strom "BRAUCHT STROM", mit Strom Preis.
- */
 public final class ShopDisplaySystem {
     private ShopDisplaySystem() { }
 
@@ -40,11 +35,11 @@ public final class ShopDisplaySystem {
             return;
         }
         final World world = zombiesWorld.getBukkit();
-        final boolean powerOn = Boolean.TRUE.equals(zombiesWorld.get(ZombiesWorld.POWER_SWITCH));
+        final Boolean powerAttr = zombiesWorld.get(ZombiesWorld.POWER_SWITCH);
+        final boolean powerOn = Boolean.TRUE.equals(powerAttr);
 
         HologramUtil.removeAll(world);
 
-        // Tuer-Hologramme (fliegende Nametags)
         for (final Door door : config.doors) {
             if (door.position == null) {
                 continue;
@@ -58,7 +53,6 @@ public final class ShopDisplaySystem {
             ));
         }
 
-        // Perk-Maschinen Schilder
         for (final PerkMachine perkMachine : config.perkMachines) {
             if (perkMachine.position == null || perkMachine.perk == null) {
                 continue;
@@ -80,13 +74,12 @@ public final class ShopDisplaySystem {
             placePerkSign(world, perkMachine.position, lines);
         }
 
-        // Power Switch
         if (config.powerSwitch != null && config.powerSwitch.position != null) {
             final List<Component> lines = powerOn
                     ? List.of(
                         Component.text("STROM").color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD),
                         Component.text("AKTIV").color(NamedTextColor.GREEN),
-                        Component.text("")
+                        Component.empty()
                     )
                     : List.of(
                         Component.text("STROM").color(NamedTextColor.YELLOW).decorate(TextDecoration.BOLD),
@@ -96,7 +89,6 @@ public final class ShopDisplaySystem {
             placeShopSign(world, config.powerSwitch.position, lines);
         }
 
-        // Waffen-Shops
         for (final WeaponShop weaponShop : config.weaponShops) {
             if (weaponShop.position == null || weaponShop.weaponType == null) {
                 continue;
@@ -108,7 +100,6 @@ public final class ShopDisplaySystem {
             ));
         }
 
-        // Ruestung
         for (final ArmorShop armorShop : config.armorShops) {
             if (armorShop.position == null || armorShop.quality == null || armorShop.part == null) {
                 continue;
@@ -122,9 +113,8 @@ public final class ShopDisplaySystem {
     }
 
     private static Location doorCenter(final World world, final Door door) {
-        // Mittelpunkt der Tuer-Area
-        final var p1 = door.position.position1;
-        final var p2 = door.position.position2;
+        final BlockPosition p1 = door.position.position1();
+        final BlockPosition p2 = door.position.position2();
         final double x = (p1.blockX() + p2.blockX()) / 2.0;
         final double y = Math.max(p1.blockY(), p2.blockY());
         final double z = (p1.blockZ() + p2.blockZ()) / 2.0;
@@ -142,7 +132,6 @@ public final class ShopDisplaySystem {
     private static void placePerkSign(final World world, final BlockPosition position, final List<Component> lines) {
         final Optional<SignPos> pos = getPerkSignPosition(world, position);
         if (pos.isEmpty()) {
-            // Fallback: Shop-Logik
             placeShopSign(world, position, lines);
             return;
         }
