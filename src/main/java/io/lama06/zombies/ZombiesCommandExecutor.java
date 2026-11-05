@@ -4,27 +4,15 @@ import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import io.lama06.zombies.event.player.PlayerCancelCommandEvent;
 import io.lama06.zombies.event.player.PlayerGoldChangeEvent;
-import io.lama06.zombies.perk.PerkMachine;
 import io.lama06.zombies.system.ShopDisplaySystem;
-import io.lama06.zombies.util.PositionUtil;
 import io.lama06.zombies.weapon.WeaponType;
 import io.lama06.zombies.zombie.ZombieType;
-import io.papermc.paper.math.BlockPosition;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.Sign;
-import org.bukkit.block.data.type.Switch;
-import org.bukkit.block.data.type.WallSign;
-import org.bukkit.block.sign.Side;
-import org.bukkit.block.sign.SignSide;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -34,10 +22,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 public final class ZombiesCommandExecutor implements TabExecutor {
     private static final String DEAD_END_TEMPLATE = "templates/dead_end.json";
@@ -68,6 +54,7 @@ public final class ZombiesCommandExecutor implements TabExecutor {
             case "cancel" -> cancel(sender);
             case "placeSigns" -> placeSigns(sender, remainingArgs);
             case "dumpWorldConfig" -> dumpWorldConfig(sender);
+            case "difficulty", "schwierigkeit" -> difficulty(sender, remainingArgs);
             default -> sender.sendMessage(Component.text("Unbekannter Befehl").color(NamedTextColor.RED));
         }
 
@@ -81,21 +68,16 @@ public final class ZombiesCommandExecutor implements TabExecutor {
             final String label,
             final String[] args
     ) {
-        if (args.length != 1 && args.length != 0) {
-            return List.of();
+        if (args.length == 1) {
+            return List.of(
+                    "config", "saveConfig", "checkConfig", "loadTemplate", "start", "stop",
+                    "giveGold", "giveWeapon", "spawnZombie", "placeSigns", "difficulty"
+            );
         }
-        return List.of(
-                "config",
-                "saveConfig",
-                "checkConfig",
-                "loadTemplate",
-                "start",
-                "stop",
-                "giveGold",
-                "giveWeapon",
-                "spawnZombie",
-                "placeSigns"
-        );
+        if (args.length == 2 && args[0].equalsIgnoreCase("difficulty")) {
+            return List.of("leicht", "normal", "schwer");
+        }
+        return List.of();
     }
 
     private void root(final CommandSender sender) {
@@ -114,9 +96,31 @@ public final class ZombiesCommandExecutor implements TabExecutor {
         builder.append(Component.text("Lama06").color(NamedTextColor.GOLD));
 
         builder.appendNewline();
-        builder.append(Component.text("Befehle: /zombies loadTemplate  |  /zombies start  |  /zombies placeSigns"));
+        builder.append(Component.text("Befehle: /zombies loadTemplate | start | difficulty leicht|normal|schwer"));
 
         sender.sendMessage(builder);
+    }
+
+    private void difficulty(final CommandSender sender, final String[] args) {
+        if (!(sender instanceof final Player player)) {
+            sender.sendMessage(Component.text("Nur als Spieler nutzbar.").color(NamedTextColor.RED));
+            return;
+        }
+        final ZombiesWorld world = new ZombiesWorld(player.getWorld());
+        if (args.length == 0) {
+            final GameDifficulty current = world.getDifficulty();
+            sender.sendMessage(Component.text("Aktuelle Schwierigkeit: ").append(current.getDisplayName()));
+            sender.sendMessage(Component.text("Aendern: /zombies difficulty leicht|normal|schwer").color(NamedTextColor.GRAY));
+            return;
+        }
+        if (world.isGameRunning()) {
+            sender.sendMessage(Component.text("Schwierigkeit nur vor Spielstart aendern.").color(NamedTextColor.RED));
+            return;
+        }
+        final GameDifficulty d = GameDifficulty.fromString(args[0]);
+        world.set(ZombiesWorld.DIFFICULTY, d.name());
+        sender.sendMessage(Component.text("Schwierigkeit gesetzt: ").append(d.getDisplayName()));
+        sender.sendMessage(Component.text("Leicht = weniger/schwächere Zombies, Schwer = mehr/stärkere.").color(NamedTextColor.GRAY));
     }
 
     private void config(final CommandSender sender) {
@@ -236,7 +240,6 @@ public final class ZombiesCommandExecutor implements TabExecutor {
             return;
         }
         world.startGame();
-        // Displays nach Start (Power ist aus)
         ShopDisplaySystem.refreshAll(world);
         player.sendMessage(Component.text("Spiel gestartet!").color(NamedTextColor.GREEN));
     }
