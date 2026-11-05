@@ -38,6 +38,8 @@ public final class ZombiesWorld extends Storage implements ForwardingAudience {
     public static final AttributeId<List<String>> REACHABLE_AREAS = new AttributeId<>("reachable_areas", PersistentDataType.LIST.strings());
     public static final AttributeId<List<Integer>> OPEN_DOORS = new AttributeId<>("open_doors", PersistentDataType.LIST.integers());
     public static final AttributeId<Integer> DRAGONS_WRATH_USED = new AttributeId<>("dragons_wrath_used", PersistentDataType.INTEGER);
+    /** Leicht / Normal / Schwer – gespeichert als String-Name. */
+    public static final AttributeId<String> DIFFICULTY = new AttributeId<>("difficulty", PersistentDataType.STRING);
 
     public static final ComponentId PERKS_COMPONENT = new ComponentId("perks");
 
@@ -57,6 +59,11 @@ public final class ZombiesWorld extends Storage implements ForwardingAudience {
 
     public WorldConfig getConfig() {
         return ZombiesPlugin.INSTANCE.getWorldConfig(this);
+    }
+
+    public GameDifficulty getDifficulty() {
+        final String raw = get(DIFFICULTY);
+        return raw == null ? GameDifficulty.NORMAL : GameDifficulty.fromString(raw);
     }
 
     public void startGame() {
@@ -126,7 +133,6 @@ public final class ZombiesWorld extends Storage implements ForwardingAudience {
         if (windows.isEmpty()) {
             return null;
         }
-        // Verteilt: zufaelliges Fenster unter den 3 naechsten zum Spieler
         final ZombiesPlayer player = players.get(rnd.nextInt(players.size()));
         final List<Window> ranked = windows.stream()
                 .sorted(Comparator.comparingDouble(w -> distanceToPlayer(w, player)))
