@@ -5,6 +5,7 @@ import io.lama06.zombies.data.Component;
 import io.lama06.zombies.event.GameStartEvent;
 import io.lama06.zombies.perk.GlobalPerk;
 import io.lama06.zombies.weapon.WeaponType;
+import net.kyori.adventure.text.Component as AdvComponent;
 import org.bukkit.GameMode;
 import org.bukkit.GameRule;
 import org.bukkit.entity.Player;
@@ -28,13 +29,19 @@ public final class PrepareWorldAtGameStartSystem implements Listener {
         world.getBukkit().setGameRule(GameRule.MOB_GRIEFING, false);
         world.getBukkit().setGameRule(GameRule.DISABLE_RAIDS, true);
 
+        // Default-Schwierigkeit falls noch nicht gesetzt
+        if (world.get(ZombiesWorld.DIFFICULTY) == null) {
+            world.set(ZombiesWorld.DIFFICULTY, GameDifficulty.NORMAL.name());
+        }
+        final GameDifficulty difficulty = world.getDifficulty();
+
         world.set(ZombiesWorld.GAME_ID, gameId);
         world.set(ZombiesWorld.ROUND, 1);
         world.set(ZombiesWorld.OPEN_DOORS, List.of());
         world.set(ZombiesWorld.REACHABLE_AREAS, List.of(config.startArea));
         world.set(ZombiesWorld.POWER_SWITCH, false);
         world.set(ZombiesWorld.NEXT_ZOMBIE_TIME, firstRoundSpawnRate.spawnDelay());
-        world.set(ZombiesWorld.REMAINING_ZOMBIES, firstRoundSpawnRate.getNumberOfZombies());
+        world.set(ZombiesWorld.REMAINING_ZOMBIES, difficulty.scaleCount(firstRoundSpawnRate.getNumberOfZombies()));
         world.set(ZombiesWorld.BOSS_SPAWNED, false);
         world.set(ZombiesWorld.DRAGONS_WRATH_USED, 0);
 
@@ -69,5 +76,10 @@ public final class PrepareWorldAtGameStartSystem implements Listener {
             player.giveWeapon(0, WeaponType.KNIFE);
             player.giveWeapon(1, WeaponType.PISTOL);
         }
+
+        world.sendMessage(
+                net.kyori.adventure.text.Component.text("Spiel gestartet – Schwierigkeit: ")
+                        .append(difficulty.getDisplayName())
+        );
     }
 }

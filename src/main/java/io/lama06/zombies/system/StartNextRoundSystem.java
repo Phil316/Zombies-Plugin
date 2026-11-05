@@ -1,12 +1,14 @@
 package io.lama06.zombies.system;
 
 import com.destroystokyo.paper.event.server.ServerTickEndEvent;
+import io.lama06.zombies.GameDifficulty;
 import io.lama06.zombies.SpawnRate;
 import io.lama06.zombies.ZombiesPlugin;
 import io.lama06.zombies.ZombiesWorld;
 import io.lama06.zombies.event.StartRoundEvent;
 import io.lama06.zombies.zombie.Zombie;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -34,12 +36,19 @@ public final class StartNextRoundSystem implements Listener {
                 continue;
             }
             final SpawnRate spawnRate = SpawnRate.SPAWN_RATES.get(nextRound - 1);
+            final GameDifficulty difficulty = world.getDifficulty();
+            final int scaledCount = difficulty.scaleCount(spawnRate.getNumberOfZombies());
+
             world.set(ZombiesWorld.ROUND, nextRound);
             world.set(ZombiesWorld.NEXT_ZOMBIE_TIME, spawnRate.spawnDelay());
-            world.set(ZombiesWorld.REMAINING_ZOMBIES, spawnRate.getNumberOfZombies());
+            world.set(ZombiesWorld.REMAINING_ZOMBIES, scaledCount);
             world.set(ZombiesWorld.BOSS_SPAWNED, false);
-            world.sendMessage(Component.text("Round " + nextRound));
-            Bukkit.getPluginManager().callEvent(new StartRoundEvent(world, currentRound + 1));
+            world.sendMessage(
+                    Component.text("Runde " + nextRound + " – ")
+                            .append(difficulty.getDisplayName())
+                            .color(NamedTextColor.GOLD)
+            );
+            Bukkit.getPluginManager().callEvent(new StartRoundEvent(world, nextRound));
         }
     }
 }
