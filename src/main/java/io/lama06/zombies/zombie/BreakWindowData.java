@@ -6,8 +6,9 @@ import io.papermc.paper.math.BlockPosition;
 import org.bukkit.persistence.PersistentDataType;
 
 public record BreakWindowData(int time, double maxDistance) {
+    /** maxDistance erhoeht: Zombies erreichen Fenster-Bretter zuverlaessiger. */
     public BreakWindowData(final int time) {
-        this(time, 1.5);
+        this(time, 2.5);
     }
 
     public static final AttributeId<Integer> REMAINING_TIME = new AttributeId<>("remaining_time", PersistentDataType.INTEGER);

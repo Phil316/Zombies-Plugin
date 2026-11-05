@@ -12,20 +12,16 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.Sign;
-import org.bukkit.block.data.type.Switch;
-import org.bukkit.block.data.type.WallSign;
-import org.bukkit.block.sign.Side;
-import org.bukkit.block.sign.SignSide;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
+/**
+ * Schwebende Hologramme wie bei Hypixel:
+ * Tuer: Zielgebiet + Gold
+ * Shop/Perk: Name + Preis (+ Strom-Hinweis)
+ */
 public final class ShopDisplaySystem {
     private ShopDisplaySystem() { }
 
@@ -40,75 +36,85 @@ public final class ShopDisplaySystem {
 
         HologramUtil.removeAll(world);
 
+        // Tueren: nur Ziel-Gebiet + Preis (kein Weg-Text)
+        final List<String> reachable = zombiesWorld.get(ZombiesWorld.REACHABLE_AREAS);
+        final List<String> areas = reachable != null ? reachable : List.of();
         for (final Door door : config.doors) {
             if (door.position == null) {
                 continue;
             }
+            final String target;
+            if (areas.contains(door.area1) && !areas.contains(door.area2)) {
+                target = door.area2;
+            } else if (areas.contains(door.area2) && !areas.contains(door.area1)) {
+                target = door.area1;
+            } else {
+                // Fallback: zweites Gebiet
+                target = door.area2 != null && !door.area2.isEmpty() ? door.area2 : door.area1;
+            }
             final Location mid = doorCenter(world, door);
-            mid.add(0.5, 1.6, 0.5);
+            mid.add(0.5, 1.4, 0.5);
             HologramUtil.spawnLines(mid, List.of(
-                    Component.text("Tuer").color(NamedTextColor.YELLOW).decorate(TextDecoration.BOLD),
-                    Component.text(door.area1 + " <-> " + door.area2).color(NamedTextColor.WHITE),
+                    Component.text(target).color(NamedTextColor.YELLOW).decorate(TextDecoration.BOLD),
                     Component.text(door.gold + " Gold").color(NamedTextColor.GOLD)
             ));
         }
 
-        for (final PerkMachine perkMachine : config.perkMachines) {
-            if (perkMachine.position == null || perkMachine.perk == null) {
+        // Waffen-Shops
+        for (final WeaponShop shop : config.weaponShops) {
+            if (shop.position == null || shop.weaponType == null) {
                 continue;
             }
-            final List<Component> lines;
+            final Location loc = shop.position.toLocation(world).add(0.5, 1.3, 0.5);
+            HologramUtil.spawnLines(loc, List.of(
+                    shop.weaponType.getDisplayName().color(NamedTextColor.WHITE),
+                    Component.text(shop.purchasePrice + " Gold").color(NamedTextColor.GOLD)
+            ));
+        }
+
+        // Ruestung
+        for (final ArmorShop shop : config.armorShops) {
+            if (shop.position == null || shop.quality == null || shop.part == null) {
+                continue;
+            }
+            final Location loc = shop.position.toLocation(world).add(0.5, 1.3, 0.5);
+            HologramUtil.spawnLines(loc, List.of(
+                    shop.quality.getDisplayName().append(Component.text(" ")).append(shop.part.getDisplayName()),
+                    Component.text(shop.price + " Gold").color(NamedTextColor.GOLD)
+            ));
+        }
+
+        // Perk-Maschinen
+        for (final PerkMachine machine : config.perkMachines) {
+            if (machine.position == null || machine.perk == null) {
+                continue;
+            }
+            final Location loc = machine.position.toLocation(world).add(0.5, 1.5, 0.5);
+            final List<Component> lines = new ArrayList<>();
+            lines.add(machine.perk.getDisplayName().color(NamedTextColor.LIGHT_PURPLE));
             if (powerOn) {
-                lines = List.of(
-                        perkMachine.perk.getDisplayName(),
-                        Component.text(perkMachine.gold + " Gold").color(NamedTextColor.GOLD),
-                        Component.text("Bereit").color(NamedTextColor.GREEN)
-                );
+                lines.add(Component.text(machine.gold + " Gold").color(NamedTextColor.GOLD));
             } else {
-                lines = List.of(
-                        perkMachine.perk.getDisplayName(),
-                        Component.text("BRAUCHT STROM").color(NamedTextColor.RED).decorate(TextDecoration.BOLD),
-                        Component.text(perkMachine.gold + " Gold").color(NamedTextColor.DARK_GRAY)
-                );
+                lines.add(Component.text("BRAUCHT STROM").color(NamedTextColor.RED).decorate(TextDecoration.BOLD));
+                lines.add(Component.text(machine.gold + " Gold").color(NamedTextColor.DARK_GRAY));
             }
-            placePerkSign(world, perkMachine.position, lines);
+            HologramUtil.spawnLines(loc, lines);
         }
 
+        // Power Switch
         if (config.powerSwitch != null && config.powerSwitch.position != null) {
-            final List<Component> lines = powerOn
-                    ? List.of(
+            final Location loc = config.powerSwitch.position.toLocation(world).add(0.5, 1.4, 0.5);
+            if (powerOn) {
+                HologramUtil.spawnLines(loc, List.of(
                         Component.text("STROM").color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD),
-                        Component.text("AKTIV").color(NamedTextColor.GREEN),
-                        Component.empty()
-                    )
-                    : List.of(
+                        Component.text("AKTIV").color(NamedTextColor.GREEN)
+                ));
+            } else {
+                HologramUtil.spawnLines(loc, List.of(
                         Component.text("STROM").color(NamedTextColor.YELLOW).decorate(TextDecoration.BOLD),
-                        Component.text(config.powerSwitch.gold + " Gold").color(NamedTextColor.GOLD),
-                        Component.text("Rechtsklick")
-                    );
-            placeShopSign(world, config.powerSwitch.position, lines);
-        }
-
-        for (final WeaponShop weaponShop : config.weaponShops) {
-            if (weaponShop.position == null || weaponShop.weaponType == null) {
-                continue;
+                        Component.text(config.powerSwitch.gold + " Gold").color(NamedTextColor.GOLD)
+                ));
             }
-            placeShopSign(world, weaponShop.position, List.of(
-                    weaponShop.weaponType.getDisplayName(),
-                    Component.text(weaponShop.purchasePrice + " Gold").color(NamedTextColor.GOLD),
-                    Component.text("Nachfullen: " + weaponShop.refillPrice).color(NamedTextColor.GRAY)
-            ));
-        }
-
-        for (final ArmorShop armorShop : config.armorShops) {
-            if (armorShop.position == null || armorShop.quality == null || armorShop.part == null) {
-                continue;
-            }
-            placeShopSign(world, armorShop.position, List.of(
-                    armorShop.quality.getDisplayName().append(Component.text(" Ruestung")),
-                    armorShop.part.getDisplayName(),
-                    Component.text(armorShop.price + " Gold").color(NamedTextColor.GOLD)
-            ));
         }
     }
 
@@ -119,78 +125,5 @@ public final class ShopDisplaySystem {
         final double y = Math.max(p1.blockY(), p2.blockY());
         final double z = (p1.blockZ() + p2.blockZ()) / 2.0;
         return new Location(world, x, y, z);
-    }
-
-    private static void placeShopSign(final World world, final BlockPosition position, final List<Component> lines) {
-        final Optional<SignPos> pos = getShopSignPosition(world, position);
-        if (pos.isEmpty()) {
-            return;
-        }
-        writeSign(pos.get(), lines);
-    }
-
-    private static void placePerkSign(final World world, final BlockPosition position, final List<Component> lines) {
-        final Optional<SignPos> pos = getPerkSignPosition(world, position);
-        if (pos.isEmpty()) {
-            placeShopSign(world, position, lines);
-            return;
-        }
-        writeSign(pos.get(), lines);
-    }
-
-    private record SignPos(Block block, BlockFace direction) { }
-
-    private static Optional<SignPos> getShopSignPosition(final World world, final BlockPosition position) {
-        final Block signBlock = position.toLocation(world).getBlock();
-        Block neighbour = null;
-        int modX = 0, modZ = 0;
-        search:
-        for (modX = -1; modX <= 1; modX++) {
-            for (modZ = -1; modZ <= 1; modZ++) {
-                if ((modX == 0) == (modZ == 0)) {
-                    continue;
-                }
-                final Block candidate = signBlock.getRelative(modX, 0, modZ);
-                if (candidate.getType().isEmpty()) {
-                    continue;
-                }
-                neighbour = candidate;
-                break search;
-            }
-        }
-        if (neighbour == null) {
-            return Optional.empty();
-        }
-        final int fx = modX;
-        final int fz = modZ;
-        final BlockFace toNeighbour = Arrays.stream(BlockFace.values())
-                .filter(f -> f.getModX() == fx && f.getModZ() == fz)
-                .findAny().orElse(BlockFace.NORTH);
-        return Optional.of(new SignPos(signBlock, toNeighbour.getOppositeFace()));
-    }
-
-    private static Optional<SignPos> getPerkSignPosition(final World world, final BlockPosition position) {
-        final Block buttonBlock = position.toLocation(world).getBlock();
-        if (!(buttonBlock.getBlockData() instanceof final Switch buttonData)) {
-            return Optional.empty();
-        }
-        final BlockFace signDirection = buttonData.getFacing();
-        final Block signBlock = buttonBlock.getRelative(BlockFace.UP);
-        return Optional.of(new SignPos(signBlock, signDirection));
-    }
-
-    private static void writeSign(final SignPos pos, final List<Component> lines) {
-        final Block signBlock = pos.block();
-        signBlock.setType(Material.OAK_WALL_SIGN);
-        final WallSign data = (WallSign) signBlock.getBlockData();
-        data.setFacing(pos.direction());
-        signBlock.setBlockData(data);
-        final Sign state = (Sign) signBlock.getState();
-        final SignSide front = state.getSide(Side.FRONT);
-        front.setGlowingText(true);
-        for (int i = 0; i < Math.min(4, lines.size()); i++) {
-            front.line(i, lines.get(i));
-        }
-        state.update();
     }
 }
