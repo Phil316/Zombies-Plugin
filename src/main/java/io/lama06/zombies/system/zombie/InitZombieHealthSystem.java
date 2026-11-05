@@ -1,5 +1,7 @@
 package io.lama06.zombies.system.zombie;
 
+import io.lama06.zombies.GameDifficulty;
+import io.lama06.zombies.ZombiesWorld;
 import io.lama06.zombies.event.zombie.ZombieSpawnEvent;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -23,7 +25,18 @@ public final class InitZombieHealthSystem implements Listener {
         if (maxHealth == null) {
             return;
         }
-        maxHealth.setBaseValue(health);
-        living.setHealth(health);
+
+        GameDifficulty difficulty = GameDifficulty.NORMAL;
+        final ZombiesWorld world = event.getZombie().getWorld();
+        if (world != null) {
+            final String stored = world.get(ZombiesWorld.DIFFICULTY);
+            if (stored != null) {
+                difficulty = GameDifficulty.fromString(stored);
+            }
+        }
+
+        final double scaled = difficulty.scaleHealth(health);
+        maxHealth.setBaseValue(scaled);
+        living.setHealth(scaled);
     }
 }
