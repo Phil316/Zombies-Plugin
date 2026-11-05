@@ -5,7 +5,6 @@ import io.lama06.zombies.data.Component;
 import io.lama06.zombies.event.GameStartEvent;
 import io.lama06.zombies.perk.GlobalPerk;
 import io.lama06.zombies.weapon.WeaponType;
-import net.kyori.adventure.text.Component as AdvComponent;
 import org.bukkit.GameMode;
 import org.bukkit.GameRule;
 import org.bukkit.entity.Player;
@@ -29,7 +28,6 @@ public final class PrepareWorldAtGameStartSystem implements Listener {
         world.getBukkit().setGameRule(GameRule.MOB_GRIEFING, false);
         world.getBukkit().setGameRule(GameRule.DISABLE_RAIDS, true);
 
-        // Default-Schwierigkeit falls noch nicht gesetzt
         if (world.get(ZombiesWorld.DIFFICULTY) == null) {
             world.set(ZombiesWorld.DIFFICULTY, GameDifficulty.NORMAL.name());
         }
