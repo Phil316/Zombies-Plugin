@@ -1,0 +1,5 @@
+1.0.1-deutsch
+Testpaket 2
+
+Befehle: /zombies map | join | lobbynpc | start | nv | practice gold | giveKey
+JAR: dist/zombies-1.0.1-deutsch.jar (nach Upload) oder Testpaket 2

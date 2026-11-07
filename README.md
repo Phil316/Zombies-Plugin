@@ -1,35 +1,33 @@
-# Zombies Plugin
+# Zombies-Plugin (Phil316 Fork – Deutsch)
 
-## Features
-- A lot of different zombie types and attacks (melee, laser, fireball, explosion)
-- Very easy to get started: Dead End map and configuration provided (see below)
-- Perks (speed, extra health, quick fire, frozen bullets, extra weapon etc.)
-- Collectable perks dropped by zombies (instant kill, full ammo, double gold)
-- Several different weapons (rifle, shotgun, sniper, flamethrower etc.)
-- Animated lucky chests
-- Highly configurable using inventory UIs: door, windows, shops etc.
-- Support for custom maps
-- Commands to give yourself gold, weapons, summon zombies etc.
-- Armor shops
-- Power switch
-- Team machine
-- No usage of NMS: the plugin probably won't break with new Minecraft versions
-- ...
+**Version: 1.0.1-deutsch**
 
-## Showcase
+Fork von [Lama06/Zombies-Plugin](https://github.com/Lama06/Zombies-Plugin) mit deutschen Texten, Map-Auswahl, Spieler-Balance, Power-Ups (Tischler/Nuke/Shopping Spree), Prison-Keys, Hypixel-Titles.
 
-![Inferno](img/inferno.png)
-![Laser](img/laser.png)
-![Config](img/config.png)
-![Perk](img/perk.png)
-![Team Machine](img/team_machine.png)
+## Schnellstart
 
-## Getting started
+1. JAR aus **Testpaket 2** oder Release nutzen: `zombies-1.0.1-deutsch.jar`
+2. In `plugins/` legen, **alte Zombies-JARs löschen**
+3. Server starten → `/zombies` zeigt Version **1.0.1-deutsch**
 
-- Download the plugin's latest version from [GitHub](https://github.com/Lama06/Zombies-Plugin/releases/latest).
-- Download the [Dead End map](https://github.com/Lama06/Zombies-Plugin/releases/tag/world) and add it to your server:
-  - Either delete your server's world directory and replace it with the Dead End world
-  - or use a world management plugin to add it to your server.
-- Join the server, enter the world you added and execute `/zombies loadTemplate` to load the default configuration for Dead End.
-- Use `/zombies start` to start a game and `/zombies stop` to stop a game.
-- Have fun!
+## Befehle
+
+```
+/zombies map
+/zombies join dead_end
+/zombies join prison
+/zombies lobbynpc
+/zombies start
+/zombies difficulty normal
+/zombies nv
+/zombies practice gold
+/zombies giveKey GREEN
+```
+
+## BAT
+
+Die Server-BAT lädt die Plugin-JAR von diesem Repo (`dist/`), wenn keine lokale JAR liegt.
+
+## Hinweis
+
+GitHub enthält den Source. Fertige JAR bitte aus Testpaket 2 verwenden oder selbst mit Maven bauen (`mvn package`).
